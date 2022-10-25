@@ -112,7 +112,8 @@ class VaspInputSet(InputSet):
                     else:
                         f.write(v.__str__())
             elif not overwrite and (directory / k).exists():
-                raise FileExistsError(f"{directory / k} already exists.")
+                # raise FileExistsError(f"{directory / k} already exists.")
+                warnings.warn(f"{directory / k} already exists. No new {directory / k} will be generated.")
 
     @staticmethod
     def from_directory(directory: str | Path, optional_files: dict = None):

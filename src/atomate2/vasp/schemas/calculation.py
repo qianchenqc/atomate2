@@ -406,6 +406,9 @@ class CalculationOutput(BaseModel):
         description="Element- and orbital-projected band properties (in eV) for the "
         "DOS. All properties are with respect to the Fermi level.",
     )
+    traj_info: Dict[str, Any] = Field(
+        None, description="Information extracted from the trajectory"
+    )
     run_stats: RunStatistics = Field(
         None, description="Summary of runtime statistics for this calculation"
     )
@@ -475,6 +478,17 @@ class CalculationOutput(BaseModel):
                 i: locpot.get_average_along_axis(i).tolist() for i in range(3)
             }
 
+        # for MD
+        if store_trajectory:
+            traj_info = dict(
+                temperature = vasprun.parameters["TEEND"],
+                time_step = vasprun.parameters["POTIM"],
+                nsteps = len(vasprun.structures),
+                step_skip = vasprun.ionic_step_skip or 1,
+            )
+        else:
+            traj_info = None
+
         # parse force constants
         phonon_output = {}
         if hasattr(vasprun, "force_constants"):
@@ -539,6 +553,7 @@ class CalculationOutput(BaseModel):
             run_stats=RunStatistics.from_outcar(outcar),
             **electronic_output,
             **phonon_output,
+            traj_info=traj_info,
         )
 
 

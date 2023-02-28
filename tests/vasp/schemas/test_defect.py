@@ -1,11 +1,12 @@
 def test_sort_pos_dist():
     """
     Test the sorting algorithm with a list of 2D positions.
-    The algorithm should sort the list into a straight line depending on the direction of s1 and s2
+    The algorithm should sort the list into a straight line depending on the direction
+    of s1 and s2
     """
     import numpy as np
 
-    from atomate2.vasp.schemas.defect import sort_pos_dist
+    from atomate2.common.analysis.defects.schemas import sort_pos_dist
 
     def abs_d(s1, s2):
         return np.linalg.norm(np.array(s1) - np.array(s2))
@@ -24,16 +25,12 @@ def test_CCDDocument(vasp_test_dir):
     """
     from collections import defaultdict
 
-    from atomate2.vasp.schemas.defect import CCDDocument
+    from atomate2.common.analysis.defects.schemas import CCDDocument
     from atomate2.vasp.schemas.task import TaskDocument
 
     def is_strict_minimum(min_index, arr):
         min_val = arr[min_index]
-        for i, val in enumerate(arr):
-            if i != min_index:
-                if val < min_val:
-                    return False
-        return True
+        return all(not (i != min_index and val < min_val) for i, val in enumerate(arr))
 
     static_tasks1: list[TaskDocument] = []
     static_tasks2: list[TaskDocument] = []

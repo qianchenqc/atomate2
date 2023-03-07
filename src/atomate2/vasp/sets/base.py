@@ -74,6 +74,7 @@ class VaspInputSet(InputSet):
         make_dir: bool = True,
         overwrite: bool = True,
         potcar_spec: bool = False,
+        files_to_overwrite: list[str] = ['INCAR'],
     ):
         """
         Write VASP input files to a directory.
@@ -113,7 +114,11 @@ class VaspInputSet(InputSet):
                         f.write(v.__str__())
             elif not overwrite and (directory / k).exists():
                 # raise FileExistsError(f"{directory / k} already exists.")
-                warnings.warn(f"{directory / k} already exists. No new {directory / k} will be generated.")
+                if k in files_to_overwrite:
+                    with zopen(directory / k, "wt") as f:
+                        f.write(v.__str__())
+                else:
+                    warnings.warn(f"{directory / k} already exists. No new {directory / k} will be generated.")
 
     @staticmethod
     def from_directory(directory: str | Path, optional_files: dict = None):

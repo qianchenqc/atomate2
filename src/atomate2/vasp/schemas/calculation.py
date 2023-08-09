@@ -422,7 +422,6 @@ class CalculationOutput(BaseModel):
         locpot: Optional[Locpot] = None,
         elph_poscars: Optional[List[Path]] = None,
         store_trajectory: bool = False,
-        store_outcar: bool = True,
     ) -> "CalculationOutput":
         """
         Create a VASP output document from VASP outputs.
@@ -443,9 +442,6 @@ class CalculationOutput(BaseModel):
         store_trajectory
             Whether to store ionic steps as a pymatgen Trajectory object. If `True`,
             the `ionic_steps` field is left as None.
-        store_outcar
-            Whether to store the entire OUTCAR file as a dictionary. If `False`, the
-            `outcar` field is left as None.
 
         Returns
         -------
@@ -512,10 +508,8 @@ class CalculationOutput(BaseModel):
                 normalmode_eigenvecs=vasprun.normalmode_eigenvecs.tolist(),
             )
 
-        outcar_dict = {}
-        if store_outcar:
-            outcar_dict = outcar.as_dict()
-            outcar_dict.pop("run_stats")
+        outcar_dict = outcar.as_dict()
+        outcar_dict.pop("run_stats")
 
         # use structure from CONTCAR as it is written to
         # greater precision than in the vasprun
@@ -619,7 +613,6 @@ class Calculation(BaseModel):
             Tuple[str]
         ] = SETTINGS.VASP_STORE_VOLUMETRIC_DATA,
         store_trajectory: bool = False,
-        store_outcar: bool = True,
         vasprun_kwargs: Optional[Dict] = None,
     ) -> Tuple["Calculation", Dict[VaspObject, Dict]]:
         """
@@ -679,8 +672,6 @@ class Calculation(BaseModel):
             Whether to store the ionic steps in a pymatgen Trajectory object. if `True`,
             :obj:'.CalculationOutput.ionic_steps' is set to None to reduce duplicating
             information.
-        store_outcar
-            Whether to store the OUTCAR file.
         vasprun_kwargs
             Additional keyword arguments that will be passed to the Vasprun init.
 
@@ -740,7 +731,6 @@ class Calculation(BaseModel):
             locpot=locpot,
             elph_poscars=elph_poscars,
             store_trajectory=store_trajectory,
-            store_outcar= store_outcar,
         )
         if store_trajectory:
             traj = Trajectory.from_structures(

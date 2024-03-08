@@ -10,6 +10,7 @@ from emmet.core.structure_group import StructureGroupDoc
 from jobflow import Flow, Maker, Response, job
 from pymatgen.analysis.defects.generators import ChargeInterstitialGenerator
 from pymatgen.entries.computed_entries import ComputedStructureEntry
+from pymatgen.io.vasp import Chgcar
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -281,12 +282,12 @@ def get_min_energy_summary(
     ]
 
     if len(topotactic_summaries) == 0:
-        return None
+        return [None]
 
     return min(topotactic_summaries, key=lambda x: x.entry.energy_per_atom)
 
 
-@job
+@job(data=[Chgcar])
 def get_charge_density_job(
     prev_dir: Path | str,
     get_charge_density: Callable,

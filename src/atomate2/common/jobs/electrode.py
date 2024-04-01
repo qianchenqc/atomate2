@@ -39,7 +39,7 @@ class RelaxJobSummary(NamedTuple):
 
 @job
 def get_stable_inserted_results(
-    structure: Structure,
+    structure: Structure | list | None,
     inserted_element: ElementLike,
     structure_matcher: StructureMatcher,
     static_maker: Maker,
@@ -84,6 +84,8 @@ def get_stable_inserted_results(
     """
     if structure is None:
         return []
+    elif isinstance(structure, list):
+        structure = structure[0]
     if n_steps is not None and n_steps <= 0:
         return []
     # append job name
@@ -107,7 +109,7 @@ def get_stable_inserted_results(
     )
     nn_step = n_steps - 1 if n_steps is not None else None
     next_step = get_stable_inserted_results(
-        structure=min_en_job.output[0],
+        structure=min_en_job.output,
         inserted_element=inserted_element,
         structure_matcher=structure_matcher,
         static_maker=static_maker,
@@ -282,7 +284,7 @@ def get_min_energy_summary(
     ]
 
     if len(topotactic_summaries) == 0:
-        return [None]
+        return None
 
     return min(topotactic_summaries, key=lambda x: x.entry.energy_per_atom)
 

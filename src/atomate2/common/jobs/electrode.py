@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, NamedTuple
 
 from emmet.core.electrode import InsertionElectrodeDoc
 from emmet.core.structure_group import StructureGroupDoc
-from jobflow import Flow, Maker, Response, job
+from jobflow import Flow, Maker, Response, job, OnMissing
 from pymatgen.analysis.defects.generators import ChargeInterstitialGenerator
 from pymatgen.entries.computed_entries import ComputedStructureEntry
 from pymatgen.io.vasp import Chgcar
@@ -107,6 +107,8 @@ def get_stable_inserted_results(
         ref_structure=structure,
         structure_matcher=structure_matcher,
     )
+    
+    min_en_job.config.on_missing_references = OnMissing.NONE
     nn_step = n_steps - 1 if n_steps is not None else None
     next_step = get_stable_inserted_results(
         structure=min_en_job.output,
@@ -276,7 +278,9 @@ def get_min_energy_summary(
     """
     # Since the outputs parser will see a NamedTuple and immediately convert it to
     # a list We have to convert the list of lists to a list of NamedTuples
-    relaxed_summaries = list(map(RelaxJobSummary._make, relaxed_summaries))
+    
+    relaxed_summaries = list(map(RelaxJobSummary._make, relaxed_summaries))    
+    relaxed_summaries = [summary for summary in relaxed_summaries if summary.structure is not None]
     topotactic_summaries = [
         summary
         for summary in relaxed_summaries
